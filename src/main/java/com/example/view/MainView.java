@@ -1,20 +1,18 @@
 package com.example.view;
 
-import com.example.pojo.Document;
-import com.vaadin.exampledata.ChanceIntegerType;
-import com.vaadin.exampledata.DataType;
-import com.vaadin.exampledata.ExampleDataGenerator;
+import com.example.data.DataGenerator;
+import com.example.data.Document;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.List;
-import java.util.Random;
 
 @Route("")
 public class MainView extends VerticalLayout implements DocumentViewer {
@@ -28,7 +26,7 @@ public class MainView extends VerticalLayout implements DocumentViewer {
     private final TextField itemCode;
     private final List<Document> documents;
 
-    public MainView() {
+    public MainView(@Autowired DataGenerator dataGenerator) {
         setHeightFull();
         image = new Image();
         image.setHeight("500px");
@@ -49,16 +47,7 @@ public class MainView extends VerticalLayout implements DocumentViewer {
         FormLayout formLayout = new FormLayout();
         formLayout.setWidth("70%");
         formLayout.add(image, title, author, genre, price, pages, published, itemCode);
-        var generator = new ExampleDataGenerator<>(Document.class, LocalDateTime.now());
-        generator.setData(Document::setImageData, DataType.BOOK_IMAGE_URL);
-        generator.setData(Document::setTitle, DataType.BOOK_TITLE);
-        generator.setData(Document::setAuthor, DataType.FULL_NAME);
-        generator.setData(Document::setGenre, DataType.BOOK_GENRE);
-        generator.setData(Document::setPrice, new ChanceIntegerType("integer", "{min: 10, max: 24}"));
-        generator.setData(Document::setPublishDate, DataType.DATE_LAST_10_YEARS);
-        generator.setData(Document::setPages, new ChanceIntegerType("integer", "{min: 70, max: 1000}"));
-        generator.setData(Document::setItemCode, DataType.IBAN);
-        documents = generator.create(50, new Random().nextInt());
+        documents = dataGenerator.getDocuments();
 
         // Create the navigation bar
         NavigationBar navigationBar = new NavigationBar(this);
@@ -72,14 +61,17 @@ public class MainView extends VerticalLayout implements DocumentViewer {
 
     @Override
     public void displayDocumentAtIndex(int index) {
-        Document selected = documents.get(index);
-        image.setSrc(selected.getImageData());
-        title.setValue(selected.getTitle());
-        author.setValue(selected.getAuthor());
-        genre.setValue(selected.getGenre());
-        price.setValue("$" + selected.getPrice());
-        pages.setValue(String.valueOf(selected.getPages()));
-        published.setValue(selected.getPublishDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)));
-        itemCode.setValue(selected.getItemCode());
+        if (!documents.isEmpty()) {
+            Document selected = documents.get(index);
+            if (selected.getImageData() != null)
+                image.setSrc(selected.getImageData());
+            title.setValue(selected.getTitle());
+            author.setValue(selected.getAuthor());
+            genre.setValue(selected.getGenre());
+            price.setValue("$" + selected.getPrice());
+            pages.setValue(String.valueOf(selected.getPages()));
+            published.setValue(selected.getPublishDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)));
+            itemCode.setValue(selected.getItemCode());
+        }
     }
 }

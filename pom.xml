@@ -10,12 +10,12 @@
     </parent>
     <groupId>com.example</groupId>
     <artifactId>nav-bar</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>war</packaging>
     <name>nav-bar</name>
-    <description>nav-bar</description>
+    <description>Custom UI component</description>
     <properties>
-        <java.version>18</java.version>
+        <java.version>11</java.version>
         <vaadin.version>23.1.2</vaadin.version>
     </properties>
     <dependencies>
@@ -75,6 +75,7 @@
         <profile>
             <id>production</id>
             <build>
+                <finalName>${project.name}</finalName>
                 <plugins>
                     <plugin>
                         <groupId>com.vaadin</groupId>
